@@ -1,6 +1,5 @@
 /**
  * Agent24 TTS - Sintesi Vocale AI
- * Dark theme with orange accent waveform visualization
  */
 
 class Agent24TTS {
@@ -12,8 +11,6 @@ class Agent24TTS {
         this.isPlaying = false;
         this.currentAudioUrl = null;
         this.animationId = null;
-
-        // Timer state
         this.timerInterval = null;
         this.timerStartTime = null;
 
@@ -40,12 +37,9 @@ class Agent24TTS {
         this.currentTimeEl = document.getElementById('current-time');
         this.durationEl = document.getElementById('duration');
         this.errorMessage = document.getElementById('error-message');
-
-        // Timer elements
         this.generationTimer = document.getElementById('generation-timer');
         this.timerValue = document.getElementById('timer-value');
         this.timerContent = this.generationTimer.querySelector('.timer-content');
-
         this.canvasCtx = this.waveformCanvas.getContext('2d');
     }
 
@@ -61,7 +55,6 @@ class Agent24TTS {
         this.audioPlayer.addEventListener('play', () => this.onPlay());
         this.audioPlayer.addEventListener('pause', () => this.onPause());
 
-        // Allow textarea typing without triggering shortcuts
         document.querySelectorAll('textarea').forEach(textarea => {
             textarea.addEventListener('keydown', (e) => {
                 if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) return;
@@ -69,7 +62,6 @@ class Agent24TTS {
             });
         });
 
-        // Ctrl+Enter to generate
         document.addEventListener('keydown', (e) => {
             if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) {
                 e.preventDefault();
@@ -77,7 +69,6 @@ class Agent24TTS {
             }
         });
 
-        // Canvas resize
         window.addEventListener('resize', () => this.resizeCanvas());
         this.resizeCanvas();
     }
@@ -142,8 +133,6 @@ class Agent24TTS {
             }
 
             const audioBlob = await response.blob();
-
-            // Stop timer as soon as we have the full response
             this.stopTimer();
 
             if (audioBlob.size === 0) {
@@ -151,10 +140,7 @@ class Agent24TTS {
             }
 
             const audioUrl = URL.createObjectURL(audioBlob);
-
-            if (this.currentAudioUrl) {
-                URL.revokeObjectURL(this.currentAudioUrl);
-            }
+            if (this.currentAudioUrl) URL.revokeObjectURL(this.currentAudioUrl);
 
             this.audioPlayer.src = audioUrl;
             this.currentAudioUrl = audioUrl;
@@ -166,7 +152,6 @@ class Agent24TTS {
 
             this.connectAudioSource();
             this.audioPlayer.play();
-
         } catch (error) {
             this.stopTimer(true);
             console.error('TTS Error:', error);
@@ -258,9 +243,7 @@ class Agent24TTS {
         this.displayWidth = rect.width;
         this.displayHeight = rect.height;
 
-        if (!this.isPlaying) {
-            this.drawIdleWaveform();
-        }
+        if (!this.isPlaying) this.drawIdleWaveform();
     }
 
     drawIdleWaveform() {
@@ -271,18 +254,16 @@ class Agent24TTS {
         ctx.clearRect(0, 0, w, h);
 
         const centerY = h / 2;
-        const barCount = 60;
-        const barWidth = 3;
+        const barCount = 50;
+        const barWidth = 2;
         const gap = (w - barCount * barWidth) / (barCount - 1);
 
         for (let i = 0; i < barCount; i++) {
             const x = i * (barWidth + gap);
-            // Gentle sine wave for idle state
-            const amplitude = 4 + Math.sin(i * 0.15) * 6 + Math.sin(i * 0.08 + 1) * 4;
-
-            ctx.fillStyle = 'rgba(255, 140, 4, 0.15)';
+            const amplitude = 3 + Math.sin(i * 0.15) * 5 + Math.sin(i * 0.08 + 1) * 3;
+            ctx.fillStyle = 'rgba(249, 115, 22, 0.12)';
             ctx.beginPath();
-            ctx.roundRect(x, centerY - amplitude, barWidth, amplitude * 2, 1.5);
+            ctx.roundRect(x, centerY - amplitude, barWidth, amplitude * 2, 1);
             ctx.fill();
         }
     }
@@ -312,8 +293,8 @@ class Agent24TTS {
             ctx.clearRect(0, 0, w, h);
 
             const centerY = h / 2;
-            const barCount = 60;
-            const barWidth = 3;
+            const barCount = 50;
+            const barWidth = 2;
             const gap = (w - barCount * barWidth) / (barCount - 1);
             const step = Math.floor(bufferLength / barCount);
 
@@ -322,51 +303,35 @@ class Agent24TTS {
                 const dataIdx = i * step;
                 const value = dataArray[dataIdx] || 0;
                 const normalizedHeight = (value / 255) * (h * 0.8);
-                const barHeight = Math.max(normalizedHeight, 3);
-
-                // Gradient from orange core to dimmer edges
+                const barHeight = Math.max(normalizedHeight, 2);
                 const intensity = value / 255;
-                const alpha = 0.2 + intensity * 0.8;
+                const alpha = 0.15 + intensity * 0.7;
 
-                // Draw reflection (bottom half, dimmer)
-                ctx.fillStyle = `rgba(255, 140, 4, ${alpha * 0.3})`;
+                // Bottom reflection
+                ctx.fillStyle = `rgba(249, 115, 22, ${alpha * 0.25})`;
                 ctx.beginPath();
-                ctx.roundRect(x, centerY, barWidth, barHeight / 2, 1.5);
+                ctx.roundRect(x, centerY, barWidth, barHeight / 2, 1);
                 ctx.fill();
 
-                // Draw main bar (top half, brighter)
-                ctx.fillStyle = `rgba(255, 140, 4, ${alpha})`;
+                // Main bar
+                ctx.fillStyle = `rgba(249, 115, 22, ${alpha})`;
                 ctx.beginPath();
-                ctx.roundRect(x, centerY - barHeight / 2, barWidth, barHeight / 2, 1.5);
+                ctx.roundRect(x, centerY - barHeight / 2, barWidth, barHeight / 2, 1);
                 ctx.fill();
-
-                // Glow on active bars
-                if (intensity > 0.5) {
-                    ctx.fillStyle = `rgba(255, 160, 51, ${(intensity - 0.5) * 0.4})`;
-                    ctx.beginPath();
-                    ctx.roundRect(x - 1, centerY - barHeight / 2 - 1, barWidth + 2, barHeight / 2 + 2, 2);
-                    ctx.fill();
-                }
             }
         };
 
         draw();
     }
 
-    // ── Timer Methods ──────────────────────────────
-
     startTimer() {
-        // Reset previous timer
-        if (this.timerInterval) {
-            clearInterval(this.timerInterval);
-        }
+        if (this.timerInterval) clearInterval(this.timerInterval);
 
         this.timerStartTime = performance.now();
         this.generationTimer.classList.remove('hidden');
         this.timerContent.classList.remove('completed');
         this.timerValue.textContent = '0.0s';
 
-        // Update every 100ms for smooth counting
         this.timerInterval = setInterval(() => {
             const elapsed = (performance.now() - this.timerStartTime) / 1000;
             this.timerValue.textContent = this.formatTimer(elapsed);
@@ -382,27 +347,17 @@ class Agent24TTS {
         if (this.timerStartTime) {
             const elapsed = (performance.now() - this.timerStartTime) / 1000;
             this.timerValue.textContent = this.formatTimer(elapsed);
-
-            if (!isError) {
-                this.timerContent.classList.add('completed');
-            }
-
+            if (!isError) this.timerContent.classList.add('completed');
             this.timerStartTime = null;
-            console.log(`[Agent24 TTS] Tempo di generazione: ${this.formatTimer(elapsed)}`);
         }
 
         if (isError) {
-            // Hide timer on error after a short delay
-            setTimeout(() => {
-                this.generationTimer.classList.add('hidden');
-            }, 3000);
+            setTimeout(() => this.generationTimer.classList.add('hidden'), 3000);
         }
     }
 
     formatTimer(seconds) {
-        if (seconds < 60) {
-            return `${seconds.toFixed(1)}s`;
-        }
+        if (seconds < 60) return `${seconds.toFixed(1)}s`;
         const mins = Math.floor(seconds / 60);
         const secs = seconds % 60;
         return `${mins}m ${secs.toFixed(1)}s`;
@@ -423,7 +378,6 @@ class Agent24TTS {
     }
 }
 
-// Initialize
 document.addEventListener('DOMContentLoaded', () => {
     window.agent24TTS = new Agent24TTS();
 });
