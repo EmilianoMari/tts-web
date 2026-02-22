@@ -7,8 +7,7 @@
 const MODELS = {
     chatterbox:       { name: 'Chatterbox',    param: 'exaggeration', paramLabel: 'Emozione',  paramMin: 0, paramMax: 2, paramStep: 0.1, paramDefault: 0.5, model: null },
     kokoro:           { name: 'Kokoro',        param: 'speed',        paramLabel: 'Velocit\u00e0', paramMin: 0.5, paramMax: 2, paramStep: 0.1, paramDefault: 1.0, model: null },
-    cosyvoice:        { name: 'CosyVoice',     param: 'speed',        paramLabel: 'Velocit\u00e0', paramMin: 0.5, paramMax: 2, paramStep: 0.1, paramDefault: 1.0, model: null },
-    'elevenlabs-turbo': { name: 'ElevenLabs Turbo', param: 'stability', paramLabel: 'Stabilit\u00e0', paramMin: 0, paramMax: 1, paramStep: 0.05, paramDefault: 0.5, model: 'turbo' },
+'elevenlabs-turbo': { name: 'ElevenLabs Turbo', param: 'stability', paramLabel: 'Stabilit\u00e0', paramMin: 0, paramMax: 1, paramStep: 0.05, paramDefault: 0.5, model: 'turbo' },
     'elevenlabs-v3':    { name: 'ElevenLabs v3',    param: 'stability', paramLabel: 'Stabilit\u00e0', paramMin: 0, paramMax: 1, paramStep: 0.05, paramDefault: 0.5, model: 'multilingual' },
 };
 
